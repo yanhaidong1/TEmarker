@@ -1,0 +1,15 @@
+ClassI_LTR_Gypsy	29
+ClassI_LTR_ltr_Others	80
+ClassII_DNA_MITE_Harbinger	33
+ClassII_DNA_nMITE_EnSpm	10
+Mix_POS	54
+ClassII_DNA_MITE_mite_Others	17
+ClassI_LTR_Copia	16
+ClassII_DNA_MITE_Tc	12
+ClassIII_RC_Helitron	10
+ClassII_DNA_MITE_MuDR	18
+ClassII_DNA_MITE_hAT	5
+ClassI_nLTR_SINE	4
+ClassII_DNA_nMITE_MuDR	5
+ClassI_nLTR_LINE	9
+Unknown_TE	1
