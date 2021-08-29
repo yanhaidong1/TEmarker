@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+##updating 032821 change the csv to the txt for opt_temp_sort_consensus_TE
 
 ##import modules
 import pandas as pd
@@ -20,7 +21,7 @@ def modification_consensus (input_consensus_TE_file,thresd,D02_modify_consensus_
     ##updation8.11 add the sample information
     ltr_fl.columns = ['chr', 'start', 'end','te_nm','direct','num1', 'num2','ratio','sample_string']
     ltr_sort_fl = ltr_fl.sort_values(by=['chr', 'start'])
-    ltr_sort_fl.to_csv(D02_modify_consensus_dir + '/opt_temp_sort_consensus_TE.csv', sep='\t')
+    ltr_sort_fl.to_csv(D02_modify_consensus_dir + '/opt_temp_sort_consensus_TE.txt', sep='\t')
 
     ##get the total line number of the file
     total_line_num = calcualte_all_line_number (input_consensus_TE_file)
@@ -31,86 +32,90 @@ def modification_consensus (input_consensus_TE_file,thresd,D02_modify_consensus_
 
     id = 0
     line_count = 0
-    with open (D02_modify_consensus_dir + '/opt_temp_sort_consensus_TE.csv','r') as ipt:
+    with open (D02_modify_consensus_dir + '/opt_temp_sort_consensus_TE.txt','r') as ipt:
         for eachline in ipt:
             line_count += 1
             if line_count != 1:
                 #if not eachline.startswith('chr'):
 
                 eachline = eachline.strip('\n')
+
                 col = eachline.strip().split()
-                chr_nm = col[1]
-                start = col[2]
-                end = col[3]
-                te_nm = col[4]
-                direct = col[5]
-                num_1 = col[6]
-                num_2 = col[7]
-                ratio = col[8]
-                samples = col[9]
 
-                ##only compare the start region
-                ##only consider the non-reference situation
-                diff = int(end) - int(start)
+                if len(col) == 10:
+
+                    chr_nm = col[1]
+                    start = col[2]
+                    end = col[3]
+                    te_nm = col[4]
+                    direct = col[5]
+                    num_1 = col[6]
+                    num_2 = col[7]
+                    ratio = col[8]
+                    samples = col[9]
+
+                    ##only compare the start region
+                    ##only consider the non-reference situation
+                    diff = int(end) - int(start)
 
 
-                if diff == 1 or diff == 2:
-                    id += 1
-                    ##store all the line information
-                    line_dic[str(id)] = {'chr': chr_nm, 'st': start, 'ed': end,
-                                         'num_1': num_1, 'num_2': num_2,'ratio':ratio,
-                                         'te_nm':te_nm,'dir':direct,'samples':samples}
-                    if id == 1:
-                        temp_id_list.append(str(id))
-                    ##if id != the final line
-                    else:
-                        if line_count != (total_line_num + 1):
-                        #if id != total_line_num:
-                            diff_start = int(start) - int(line_dic[str(temp_id_list[-1])]['st'])
-                            if 0 <= diff_start <= int(thresd):
-                                if chr_nm == line_dic[str(temp_id_list[-1])]['chr']:
-                                    temp_id_list.append(str(id))
+                    if diff == 1 or diff == 2:
+                        id += 1
+                        ##store all the line information
+                        line_dic[str(id)] = {'chr': chr_nm, 'st': start, 'ed': end,
+                                             'num_1': num_1, 'num_2': num_2,'ratio':ratio,
+                                             'te_nm':te_nm,'dir':direct,'samples':samples}
+                        if id == 1:
+                            temp_id_list.append(str(id))
+                        ##if id != the final line
+                        else:
+                            if line_count != (total_line_num + 1):
+                            #if id != total_line_num:
+                                diff_start = int(start) - int(line_dic[str(temp_id_list[-1])]['st'])
+                                if 0 <= diff_start <= int(thresd):
+                                    if chr_nm == line_dic[str(temp_id_list[-1])]['chr']:
+                                        temp_id_list.append(str(id))
+                                    else:
+                                        store_id_list.append(temp_id_list)
+                                        temp_id_list = []
+                                        temp_id_list.append(str(id))
                                 else:
+                                    ##transfer the temp_id_list to a final list
+                                    ##this final list contains all the single id or id list.
                                     store_id_list.append(temp_id_list)
                                     temp_id_list = []
                                     temp_id_list.append(str(id))
-                            else:
-                                ##transfer the temp_id_list to a final list
-                                ##this final list contains all the single id or id list.
-                                store_id_list.append(temp_id_list)
-                                temp_id_list = []
-                                temp_id_list.append(str(id))
 
-                        else:
-                            #print('id is the final one')
-                            diff_start = int(start) - int(line_dic[str(temp_id_list[-1])]['st'])
-                            if 0 <= diff_start and diff_start <= int(thresd):
-                                if chr_nm == line_dic[str(temp_id_list[-1])]['chr']:
-                                    temp_id_list.append(str(id))
-                                    store_id_list.append(temp_id_list)
+                            else:
+                                #print('id is the final one')
+                                diff_start = int(start) - int(line_dic[str(temp_id_list[-1])]['st'])
+                                if 0 <= diff_start and diff_start <= int(thresd):
+                                    if chr_nm == line_dic[str(temp_id_list[-1])]['chr']:
+                                        temp_id_list.append(str(id))
+                                        store_id_list.append(temp_id_list)
+                                    else:
+                                        store_id_list.append(temp_id_list)
+                                        last_list = [str(id)]
+                                        store_id_list.append(last_list)
                                 else:
                                     store_id_list.append(temp_id_list)
                                     last_list = [str(id)]
                                     store_id_list.append(last_list)
-                            else:
-                                store_id_list.append(temp_id_list)
-                                last_list = [str(id)]
-                                store_id_list.append(last_list)
-                                #print(temp_id_list)
-                else:
-                    ##updation 8.11
-                    ##generate the sample information item
-                    ##SRRXXX:ClassIXXX;SRRXXX:ClassIXXXX
-                    ##splite the sample string into list
-                    sample_te_string = 'Sample_TE_infor'
-                    sample_list = samples.split(';')
-                    for eachsp in sample_list:
-                        single_sample_te_string = eachsp + ':' + te_nm
-                        sample_te_string = sample_te_string + ';' + single_sample_te_string
+                                    #print(temp_id_list)
+                    else:
+                        ##updation 8.11
+                        ##generate the sample information item
+                        ##SRRXXX:ClassIXXX;SRRXXX:ClassIXXXX
+                        ##splite the sample string into list
+                        sample_te_string = 'Sample_TE_infor'
+                        sample_list = samples.split(';')
+                        for eachsp in sample_list:
+                            single_sample_te_string = eachsp + ':' + te_nm
+                            sample_te_string = sample_te_string + ';' + single_sample_te_string
 
-                    final_line = chr_nm + '\t' + str(start) + '\t' + str(end) + '\t' + \
-                         str(num_1) + '\t' + str(num_2) + '\t' + str(ratio) + '\t' + 'o' + '\t' + sample_te_string
-                    final_line_list.append(final_line)
+                        final_line = chr_nm + '\t' + str(start) + '\t' + str(end) + '\t' + \
+                             str(num_1) + '\t' + str(num_2) + '\t' + str(ratio) + '\t' + 'o' + '\t' + sample_te_string
+                        final_line_list.append(final_line)
 
 
     return (line_dic,store_id_list,final_line_list)

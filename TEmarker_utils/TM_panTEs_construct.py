@@ -3,6 +3,8 @@
 import re
 import glob
 
+##updating 032821 change _ to | for the reference
+
 #############################################################
 ##Step 1 construct the consensus location for all the samples
 #############################################################
@@ -53,10 +55,10 @@ def construct_consensus_loc (input_pop_dir):
 
                     ##updation 042120
                     if 'reference' in col[3]:  ##indicate this format is from mcclintock
-                        mt_1 = re.match('^(.+)_reference.+', col[3])
+                        mt_1 = re.match('^(.+)\|reference.+', col[3])
                         if mt_1:
                             te_nm = mt_1.group(1)
-                        mt_2 = re.match('^(.+)_non-reference.+', col[3])
+                        mt_2 = re.match('^(.+)\|non-reference.+', col[3])
                         if mt_2:
                             te_nm = mt_2.group(1)
 
@@ -101,6 +103,7 @@ def construct_consensus_loc (input_pop_dir):
     ##updation 11.28
     for each_te_line in store_te_line_number_sample_str_dic:
         te_line_col = each_te_line.strip().split()
+        print(each_te_line)
         chr = te_line_col[0]
         st = te_line_col[1]
         ed = te_line_col[2]
@@ -147,10 +150,10 @@ def store_te (ref_file):
 
                 ##updation 042120 consider other format
                 if 'reference' in col[3]: ##indicate this format is from mcclintock
-                    mt_1 = re.match('^(.+)_reference.+',col[3])
+                    mt_1 = re.match('^(.+)\|reference.+',col[3])
                     if mt_1:
                         te_ref = mt_1.group(1)
-                    mt_2 = re.match('^(.+)_non-reference.+',col[3])
+                    mt_2 = re.match('^(.+)\|non-reference.+',col[3])
                     if mt_2:
                         te_ref = mt_2.group(1)
 
