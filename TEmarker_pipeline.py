@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+##updating 082921 add an option to close the bam modification
+##updation 122420
 ##this script will be used to run step 1,2,3
 
 ##This wrapper will helps users to generate the vcf file for the population genomic analysis
@@ -48,6 +50,8 @@ def get_parsed_args():
                                                            "Default: 10")
 
     parser.add_argument('-clean', dest='clean_temp_dir',help='If user set the yes, all the temp dir in the working_dir will be deletec to save the place')
+
+    parser.add_argument('-closebam', dest='closebam_yes', help="Users close to modify bam files")
 
     ##parse of parameters
     args = parser.parse_args()
@@ -169,14 +173,20 @@ def main(argv=None):
     if not os.path.exists(D01_1_modify_bam_wd):
         os.makedirs(D01_1_modify_bam_wd)
 
-    ##run the TEmarker_bam.py
-    cmd = 'python ' + TEmarker_path + '/TEmarker_bam.py -d ' + D01_1_modify_bam_wd + ' -o ' + D01_1_modify_bam_od + \
-          ' -bam_bwa_d ' + bam_bwa_dir + \
-          ' -bam_hisat2_d ' + bam_hisat2_dir + \
-          ' --samtools ' + samtools_exe + \
-          ' -pros_n_samtls ' + str(process_num)
-    print(cmd)
-    subprocess.call(cmd,shell=True)
+    ##updating 082921
+    if args.closebam_yes != 'yes':
+
+        print ('Users choose to close modifying bam files')
+
+    else:
+        ##run the TEmarker_bam.py
+        cmd = 'python ' + TEmarker_path + '/TEmarker_bam.py -d ' + D01_1_modify_bam_wd + ' -o ' + D01_1_modify_bam_od + \
+              ' -bam_bwa_d ' + bam_bwa_dir + \
+              ' -bam_hisat2_d ' + bam_hisat2_dir + \
+              ' --samtools ' + samtools_exe + \
+              ' -pros_n_samtls ' + str(process_num)
+        print(cmd)
+        subprocess.call(cmd,shell=True)
 
     if args.clean_temp_dir is not None:
         if args.clean_temp_dir == 'yes':
