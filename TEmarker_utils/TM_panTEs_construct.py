@@ -103,7 +103,7 @@ def construct_consensus_loc (input_pop_dir):
     ##updation 11.28
     for each_te_line in store_te_line_number_sample_str_dic:
         te_line_col = each_te_line.strip().split()
-        print(each_te_line)
+        #print(each_te_line)
         chr = te_line_col[0]
         st = te_line_col[1]
         ed = te_line_col[2]
