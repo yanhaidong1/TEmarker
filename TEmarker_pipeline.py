@@ -174,7 +174,7 @@ def main(argv=None):
         os.makedirs(D01_1_modify_bam_wd)
 
     ##updating 082921
-    if args.closebam_yes != 'yes':
+    if args.closebam_yes == 'yes':
 
         print ('Users choose to close modifying bam files')
 
@@ -236,13 +236,23 @@ def main(argv=None):
     if not os.path.exists(D02_genotyping_od):
         os.makedirs(D02_genotyping_od)
 
+
+    ##updating 082921
+    if args.closebam_yes == 'yes':
+        ipt_bam_bwa_dir = bam_bwa_dir
+        ipt_bam_hisat2_dir = bam_hisat2_dir
+    else:
+        ipt_bam_bwa_dir = D01_1_modify_bam_od + '/rm_pcr_bwa_bam_dir'
+        ipt_bam_hisat2_dir = D01_1_modify_bam_od + '/rm_pcr_hisat2_bam_dir'
+
+
     ##run TEmarker_genotyping.p
     ##if users do not provide the cnv directories
     if args.m_yes is None:
         cmd = 'python ' + TEmarker_path + '/TEmarker_genotyping.py -d ' + D02_genotyping_wd + ' -o ' + D02_genotyping_od + \
               ' -panTEs_f ' + D01_2_create_panTEs_od + '/opt_pan_TEs.txt' + \
-              ' -bam_bwa_d ' + D01_1_modify_bam_od + '/rm_pcr_bwa_bam_dir' \
-              ' -bam_hisat2_d ' + D01_1_modify_bam_od + '/rm_pcr_hisat2_bam_dir' + \
+              ' -bam_bwa_d ' + ipt_bam_bwa_dir + \
+              ' -bam_hisat2_d ' + ipt_bam_hisat2_dir + \
               ' -lib_f ' + TE_lib_fl + \
               ' -pros_n ' + str(process_num)
         print(cmd)
@@ -252,8 +262,8 @@ def main(argv=None):
     else:
         cmd = 'python ' + TEmarker_path + '/TEmarker_genotyping.py -d ' + D02_genotyping_wd + ' -o ' + D02_genotyping_od + \
               ' -canTE_f ' + D01_2_create_panTEs_od + '/opt_pan_TEs.txt' + \
-              ' -bam_bwa_d ' + bam_bwa_dir + \
-              ' -bam_hisat2_d ' + bam_hisat2_dir + \
+              ' -bam_bwa_d ' + ipt_bam_bwa_dir + \
+              ' -bam_hisat2_d ' + ipt_bam_hisat2_dir + \
               ' -lib_f ' + TE_lib_fl + \
               ' -pros_n ' + str(process_num) + \
               ' -modify yes' + \
