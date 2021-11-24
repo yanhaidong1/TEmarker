@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 041121 add the read supporting information
 ##updation 110520 add the MAF filtration
 ##updation 110120 add an opt to generate vcf file
 
@@ -33,7 +34,11 @@ def store_chr (input_genome_file):
 
     return (chr_num_dic)
 
-def generate_vcf (input_opt_classify,chr_num_dic,all_name_list,store_change_sp_nm_dic):
+def generate_vcf (input_opt_classify,chr_num_dic,all_name_list,store_change_sp_nm_dic,read_sup):
+
+    ##updating 041121
+    store_final_list_add_ratio_noflt_line = []
+
     ##initiate a final dic to store information
     store_final_line_list = []
     #final_line_dic = {}
@@ -51,6 +56,10 @@ def generate_vcf (input_opt_classify,chr_num_dic,all_name_list,store_change_sp_n
     store_final_line_list.append(basic_title_string)
     ##updation 8.19
     #calculate_fam_dic = {}
+
+    ##updating 041121
+    store_final_list_add_ratio_noflt_line.append(basic_title_string)
+
 
     with open (input_opt_classify,'r') as ipt:
         for eachline in ipt:
@@ -106,6 +115,9 @@ def generate_vcf (input_opt_classify,chr_num_dic,all_name_list,store_change_sp_n
             total_col_num = len(col)
 
             ##store the genotype into a name dic
+            ##updating 041121
+            name_genotype_add_ratio_dic = {}
+
             name_genotype_dic = {}  ##key is the sample name and genotype is the value
             for i in range(5,total_col_num):
 
@@ -137,10 +149,31 @@ def generate_vcf (input_opt_classify,chr_num_dic,all_name_list,store_change_sp_n
                 #SA = GT
 
                 ##extract the genotype information for each sample
-
+                #print(col[i])
                 annot_col = col[i].split(';')
                 genotype = annot_col[2]
-                name_genotype_dic[sample_nm] = genotype
+                reads_ratio = annot_col[1]
+                mt = re.match('.+/(.+)',reads_ratio)
+                real_read_sup = mt.group(1)
+                ##udpating 041121
+                if int(real_read_sup) >= int(read_sup):
+                    mt = re.match('.+:(.+)',annot_col[0])
+                    reads_ratio_val = mt.group(1)
+                    name_genotype_dic[sample_nm] = genotype
+
+                    name_genotype_add_ratio_dic[sample_nm] = genotype + ';' + reads_ratio_val + ';' + reads_ratio
+
+            ##updating 041121
+            samples_string = ''
+            for eachnm in all_name_list:
+                if eachnm in name_genotype_add_ratio_dic.keys():
+                    samples_string = samples_string + '\t' + name_genotype_add_ratio_dic[eachnm]
+                else:
+                    ##updation 8.16 change the missing data to ./.
+                    samples_string = samples_string + '\t' + './.'
+            final_line = basic_infor_line + samples_string
+            store_final_list_add_ratio_noflt_line.append(final_line)
+
 
             ##for each name in the all_sample_list
             ##if there is no information in the classify_geno file, we will add genotype 0/0 for this sample
@@ -191,7 +224,7 @@ def generate_vcf (input_opt_classify,chr_num_dic,all_name_list,store_change_sp_n
                     num_missing != number_sample:
                 store_final_line_list.append(final_line)
 
-    return (store_final_line_list)
+    return (store_final_line_list,store_final_list_add_ratio_noflt_line)
 
 def remove_duplicate (store_vcf_line_list):
 
@@ -518,5 +551,34 @@ def cal_fam_from_vcf (vcf_file):
     for eachtenm in store_all_dic:
         final_line = 'All' + '\t' + eachtenm + '\t' + str(store_all_dic[eachtenm])
         store_final_line_list.append(final_line)
+
+    return (store_final_line_list)
+
+
+##updating 041121 add a function to keep the same of ratio vcf to the final vcf
+def keep_same_to_final (final_vcf,raw_ratio_vcf):
+
+    store_final_vcf_loci_dic = {}
+    count = 0
+    with open (final_vcf,'r') as ipt:
+        for eachline in ipt:
+            eachline = eachline.strip('\n')
+            col = eachline.strip().split()
+            count += 1
+            if count != 1:
+                store_final_vcf_loci_dic[col[2]] = 1
+
+    store_final_line_list = []
+    count = 0
+    with open(raw_ratio_vcf, 'r') as ipt:
+        for eachline in ipt:
+            eachline = eachline.strip('\n')
+            col = eachline.strip().split()
+            count += 1
+            if count != 1:
+                if col[2] in store_final_vcf_loci_dic:
+                    store_final_line_list.append(eachline)
+            else:
+                store_final_line_list.append(eachline)
 
     return (store_final_line_list)
