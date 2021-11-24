@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 041121 add an option to filter out read coverage
 ##udpation 122420 add an original vcf file and change output file name
 ##updation 110520 add maf filtration argument
 ##updation 110320 analyze on the new output file
@@ -76,6 +77,12 @@ def get_parsed_args():
     parser.add_argument('-maf_thr', dest='thr_maf', help="Users provide maf filtration threshold."
                                                          "Dfault: 0.05")
 
+
+    parser.add_argument('-read_sup', dest='read_sup', help="Users provide the minimum reads that support the TE deletion or insertion."
+                                                           "For example, if there are 3 reads support insertion of TEs, we will consider this location."
+                                                           "Otherwise, this location will be considered as NULL or ./."
+                                                           "Dfault: 3")
+
     ##parse of parameters
     args = parser.parse_args()
     return args
@@ -148,16 +155,28 @@ def main(argv=None):
     else:
         thr_maf = 0.05
 
+    if args.read_sup is not None:
+        read_sup = args.read_sup
+    else:
+        read_sup = 3
+
 
     ##########################
     ##generate vcf output file
     chr_num_dic = opt_vcf.store_chr(genome_file)
     all_name_list, store_change_sp_nm_dic = opt_vcf.generate_sample_list(material_file)
-    store_final_vcf_line_list = opt_vcf.generate_vcf(genotype_file, chr_num_dic, all_name_list, store_change_sp_nm_dic)
+    store_final_vcf_line_list,store_final_list_add_ratio_noflt_line = opt_vcf.generate_vcf(genotype_file, chr_num_dic, all_name_list, store_change_sp_nm_dic,read_sup)
     store_final_vcf_uniq_line_list = opt_vcf.remove_duplicate(store_final_vcf_line_list)
     with open(working_dir + '/opt.vcf', 'w+') as opt:
         for eachline in store_final_vcf_uniq_line_list:
             opt.write(eachline + '\n')
+
+    ##updating 041121
+    ##generate a raw vcf that contains all ratio and ratio value information
+    with open(working_dir + '/temp_raw_noflt_add_ratio.vcf', 'w+') as opt:
+        for eachline in store_final_list_add_ratio_noflt_line:
+            opt.write(eachline + '\n')
+
 
     ##sorted vcf
     cmd = 'cat ' + working_dir + '/opt.vcf' + ' | (sed -u 1q; sort -k1,1V -k2,2n) > ' + working_dir + '/opt_sorted.vcf'
@@ -217,6 +236,12 @@ def main(argv=None):
     store_summary_line_list = opt_vcf.cal_fam_from_vcf(output_dir + '/opt_fltmissing_fltmaf.vcf')
     with open (output_dir + '/opt_summary_te_family.txt','w+') as opt:
         for eachline in store_summary_line_list:
+            opt.write(eachline + '\n')
+
+    ##updating 041121 add an output for the final ratio vcf
+    final_line_list = opt_vcf.keep_same_to_final(output_dir + '/opt_fltmissing_fltmaf.vcf',working_dir + '/temp_raw_noflt_add_ratio.vcf')
+    with open(output_dir + '/opt_fltmissing_fltmaf_addratio.vcf', 'w+') as opt:
+        for eachline in final_line_list:
             opt.write(eachline + '\n')
 
 
