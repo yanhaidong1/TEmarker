@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 112421 fix the problem of extracting right sequence
 ##updation 122220 for modifying the annotation, if we identify same location, we need to filter one recover 558 finish
 ##updation 122220 recover 558 774 finish
 ##updation 122220 modify the genotyping calling since there are several cases that are not right
@@ -1281,15 +1282,28 @@ def annotation (temp_split_opt_dir,
                                                 dic = {list_CIGAR[(2 * i + 1)]: list_CIGAR[(2 * i)]}
                                                 dic_list.append(dic)
 
+                                            ##updating 112421
                                             ##the first item of the dic_list should be 'S':'number'
+                                            read_string = col_tmp_sam[9]
                                             if re.match('.+(H|S)$', CIGAR):
                                                 S_num = dic_list[-1]['S']
+                                                cl_seq = read_string[-int(S_num):]
                                             else:
                                                 S_num = dic_list[0]['S']
+                                                cl_seq = read_string[:int(S_num)]
 
-                                            read_string = col_tmp_sam[9]
+
+                                            ##previous version not right
+                                            ##the first item of the dic_list should be 'S':'number'
+                                            #if re.match('.+(H|S)$', CIGAR):
+                                            #    S_num = dic_list[-1]['S']
+                                            #else:
+                                            #    S_num = dic_list[0]['S']
+                                            #read_string = col_tmp_sam[9]
                                             ##extract the clipped reads
-                                            cl_seq = read_string[:int(S_num)]
+                                            #cl_seq = read_string[:int(S_num)]
+
+
                                             ##use the cl_seq to blast each TE in the library
                                             ##write out a sequence to temp_blast_dir
                                             ##updation8.24
