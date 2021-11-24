@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 082221 add a function to do the single reads mapping
 ##this script will wrap bwa hisat2 and cnvnator as a pipeline to help users to develop the relative files using this script
 
 import argparse
@@ -53,6 +54,10 @@ def get_parsed_args():
 
     parser.add_argument('-pros_n_bwa', dest='process_num_bwa', help= 'Users provide process number that helps to increase speed in bwa.'
                                                                      'Default: 1')
+
+    ##updating 082221
+    parser.add_argument('-bwa_s', dest='bwa_s_yes', help='If user set bwa_s to yes, users need to provide the fastq_d that contains single read.'
+                                                      'Please provide samtools path using --samtools and fastq_dir using -fastq_d')
 
     ##bwa also needs samtools and fastq_d
 
@@ -358,76 +363,191 @@ def main(argv=None):
             print(cmd)
             subprocess.call(cmd, shell=True)
 
-            ##prepare fastq dir
-            sample_nm_dic = {}
-            if args.name_file is not None:
-                sample_nm_file = args.name_file
-                ##initiate a dic to store the name into a dic
-                ##key is the orginial name and value is the new name
-                with open(sample_nm_file, 'r') as ipt:
-                    for eachline in ipt:
-                        eachline = eachline.strip('\n')
-                        col = eachline.strip().split()
-                        sample_nm_dic[col[0]] = col[1]
-            else:
-                ##search name information in the fastq_dir
+
+            ##updating 082221
+            if args.bwa_s_yes != 'yes':
+
+                ##prepare fastq dir
+                sample_nm_dic = {}
+                if args.name_file is not None:
+                    sample_nm_file = args.name_file
+                    ##initiate a dic to store the name into a dic
+                    ##key is the orginial name and value is the new name
+                    with open(sample_nm_file, 'r') as ipt:
+                        for eachline in ipt:
+                            eachline = eachline.strip('\n')
+                            col = eachline.strip().split()
+                            sample_nm_dic[col[0]] = col[1]
+                else:
+                    ##search name information in the fastq_dir
+                    fastq_dir = args.fastq_dir
+                    fastq_list = glob.glob(fastq_dir + '/*')
+                    for eachfastq in fastq_list:
+                        ##extract the name from the eachfastq
+                        mt = re.match('(.+)/(.+)_(\d)(\..+)', eachfastq)
+                        fq_nm = mt.group(2)
+                        sample_nm_dic[fq_nm] = fq_nm
+
+                ##prepare fastq files
                 fastq_dir = args.fastq_dir
                 fastq_list = glob.glob(fastq_dir + '/*')
-                for eachfastq in fastq_list:
-                    ##extract the name from the eachfastq
-                    mt = re.match('(.+)/(.+)_(\d)(\..+)', eachfastq)
-                    fq_nm = mt.group(2)
-                    sample_nm_dic[fq_nm] = fq_nm
-            ##prepare fastq files
-            fastq_dir = args.fastq_dir
-            fastq_list = glob.glob(fastq_dir + '/*')
 
-            ##create index of genome
-            ##bwa will directly use genome_nm as the index name
-            cmd = bwa_exe + ' index ' + bwa_dir + '/' + genome_nm + '.' + genome_suffix
-            print(cmd)
-            subprocess.call(cmd, shell=True)
-
-            for eachnm in sample_nm_dic:
-                new_nm = sample_nm_dic[eachnm]
-
-                mt_pair_list = []
-                ##updation 11.23 revise the input fastq
-                for eachfastq in fastq_list:
-                    ##extract the name from the eachfastq
-                    mt = re.match('(.+)/(.+)_(\d)(\..+)', eachfastq)
-                    path = mt.group(1)
-                    fq_nm = mt.group(2)
-                    pair_num = mt.group(3)
-                    type_nm = mt.group(4)
-
-                    ##updation 11.23
-                    ##new_nm should be changed to fq_nm
-                    if eachnm == fq_nm:
-                        mt_pair_list.append(path + '/' + fq_nm + '_' + pair_num + type_nm)
-
-                ##run the bwa
-                cmd = bwa_exe + ' mem -t ' + str(process_num_bwa) + ' -v 0 -R \'@RG\\tID:\'' + new_nm + '\'\\tSM:\'' + \
-                      new_nm + ' ' + bwa_dir + '/' + genome_nm + '.' + genome_suffix + ' ' + mt_pair_list[0] + ' ' + mt_pair_list[1] + ' > ' + \
-                      bwa_sam_dir + '/' + new_nm + '.sam'
+                ##create index of genome
+                ##bwa will directly use genome_nm as the index name
+                cmd = bwa_exe + ' index ' + bwa_dir + '/' + genome_nm + '.' + genome_suffix
                 print(cmd)
                 subprocess.call(cmd, shell=True)
 
-                ##use the samtools to change the sam to the bam
-                cmd = samtools_exe + ' view -bS ' +  bwa_sam_dir + '/' + new_nm + '.sam' + ' > ' + bwa_bam_dir + '/' + \
-                      new_nm + '.bam'
-                print(cmd)
-                subprocess.call(cmd, shell=True)
+                for eachnm in sample_nm_dic:
+                    new_nm = sample_nm_dic[eachnm]
 
-                if args.clean_temp_dir is not None:
-                    if args.clean_temp_dir == 'yes':
-                        ##delete the sam file to save the storage
-                        cmd = 'rm ' + bwa_sam_dir + '/' + new_nm + '.sam'
+                    mt_pair_list = []
+                    ##updation 11.23 revise the input fastq
+                    for eachfastq in fastq_list:
+                        ##extract the name from the eachfastq
+                        mt = re.match('(.+)/(.+)_(\d)(\..+)', eachfastq)
+                        path = mt.group(1)
+                        fq_nm = mt.group(2)
+                        pair_num = mt.group(3)
+                        type_nm = mt.group(4)
+
+                        ##updation 11.23
+                        ##new_nm should be changed to fq_nm
+                        if eachnm == fq_nm:
+                            mt_pair_list.append(path + '/' + fq_nm + '_' + pair_num + type_nm)
+
+                    ##run the bwa
+                    cmd = bwa_exe + ' mem -t ' + str(process_num_bwa) + ' -v 0 -R \'@RG\\tID:\'' + new_nm + '\'\\tSM:\'' + \
+                          new_nm + ' ' + bwa_dir + '/' + genome_nm + '.' + genome_suffix + ' ' + mt_pair_list[0] + ' ' + mt_pair_list[1] + ' > ' + \
+                          bwa_sam_dir + '/' + new_nm + '.sam'
+                    print(cmd)
+                    subprocess.call(cmd, shell=True)
+
+                    ##use the samtools to change the sam to the bam
+                    cmd = samtools_exe + ' view -bS ' +  bwa_sam_dir + '/' + new_nm + '.sam' + ' > ' + bwa_bam_dir + '/' + \
+                          new_nm + '.bam'
+                    print(cmd)
+                    subprocess.call(cmd, shell=True)
+
+                    if args.clean_temp_dir is not None:
+                        if args.clean_temp_dir == 'yes':
+                            ##delete the sam file to save the storage
+                            cmd = 'rm ' + bwa_sam_dir + '/' + new_nm + '.sam'
+                            print(cmd)
+                            subprocess.call(cmd, shell=True)
+                        else:
+                            print("please type 'yes' behind clean argument.")
+                            return
+
+            else:
+
+                ##prepare fastq dir
+                sample_nm_dic = {}
+                if args.name_file is not None:
+                    sample_nm_file = args.name_file
+                    ##initiate a dic to store the name into a dic
+                    ##key is the orginial name and value is the new name
+                    with open(sample_nm_file, 'r') as ipt:
+                        for eachline in ipt:
+                            eachline = eachline.strip('\n')
+                            col = eachline.strip().split()
+                            sample_nm_dic[col[0]] = col[1]
+                else:
+                    ##search name information in the fastq_dir
+                    fastq_dir = args.fastq_dir
+                    fastq_list = glob.glob(fastq_dir + '/*')
+                    for eachfastq in fastq_list:
+                        ##extract the name from the eachfastq
+                        mt = re.match('.+/(.+)',eachfastq)
+                        flnm = mt.group(1)
+
+                        fq_nm = ''
+                        if 'fastq' in flnm:
+                            mt = re.match('(.+)\.fast.+',flnm)
+                            fq_nm = mt.group(1)
+                        if 'fq' in flnm:
+                            if 'gz' in flnm:
+                                mt = re.match('(.+)\.fq.gz',flnm)
+                                fq_nm = mt.group(1)
+                            else:
+                                mt = re.match('(.+)\.fq',flnm)
+                                fq_nm = mt.group(1)
+
+                        sample_nm_dic[fq_nm] = fq_nm
+
+                    ##prepare fastq files
+                    fastq_dir = args.fastq_dir
+                    fastq_list = glob.glob(fastq_dir + '/*')
+
+                    ##create index of genome
+                    ##bwa will directly use genome_nm as the index name
+                    cmd = bwa_exe + ' index ' + bwa_dir + '/' + genome_nm + '.' + genome_suffix
+                    print(cmd)
+                    subprocess.call(cmd, shell=True)
+
+                    for eachnm in sample_nm_dic:
+                        new_nm = sample_nm_dic[eachnm]
+
+                        mt_pair_list = []
+                        ##updation 11.23 revise the input fastq
+                        for eachfastq in fastq_list:
+                            ##extract the name from the eachfastq
+                            #mt = re.match('(.+)/(.+)_(\d)(\..+)', eachfastq)
+                            #path = mt.group(1)
+                            #fq_nm = mt.group(2)
+                            #pair_num = mt.group(3)
+                            #type_nm = mt.group(4)
+
+
+                            mt = re.match('(.+)/(.+)',eachfastq)
+                            path = mt.group(1)
+                            flnm = mt.group(2)
+
+                            type_nm = ''
+                            fq_nm = ''
+                            if 'fastq' in flnm:
+                                mt = re.match('(.+)\.(fast.+)', flnm)
+                                fq_nm = mt.group(1)
+                                type_nm = mt.group(2)
+                            if 'fq' in flnm:
+                                if 'gz' in flnm:
+                                    mt = re.match('(.+)\.(fq.gz)', flnm)
+                                    fq_nm = mt.group(1)
+                                    type_nm = mt.group(2)
+                                else:
+                                    mt = re.match('(.+)\.(fq)', flnm)
+                                    fq_nm = mt.group(1)
+                                    type_nm = mt.group(2)
+
+                            ##updation 11.23
+                            ##new_nm should be changed to fq_nm
+                            if eachnm == fq_nm:
+                                mt_pair_list.append(path + '/' + fq_nm + '.' + type_nm)
+
+                        ##run the bwa
+                        cmd = bwa_exe + ' mem -t ' + str(
+                            process_num_bwa) + ' -v 0 -R \'@RG\\tID:\'' + new_nm + '\'\\tSM:\'' + \
+                              new_nm + ' ' + bwa_dir + '/' + genome_nm + '.' + genome_suffix + ' ' + mt_pair_list[
+                                  0] + ' > ' + \
+                              bwa_sam_dir + '/' + new_nm + '.sam'
                         print(cmd)
                         subprocess.call(cmd, shell=True)
-                    else:
-                        print("please type 'yes' behind clean argument.")
-                        return
+
+                        ##use the samtools to change the sam to the bam
+                        cmd = samtools_exe + ' view -bS ' + bwa_sam_dir + '/' + new_nm + '.sam' + ' > ' + bwa_bam_dir + '/' + \
+                              new_nm + '.bam'
+                        print(cmd)
+                        subprocess.call(cmd, shell=True)
+
+                        if args.clean_temp_dir is not None:
+                            if args.clean_temp_dir == 'yes':
+                                ##delete the sam file to save the storage
+                                cmd = 'rm ' + bwa_sam_dir + '/' + new_nm + '.sam'
+                                print(cmd)
+                                subprocess.call(cmd, shell=True)
+                            else:
+                                print("please type 'yes' behind clean argument.")
+                                return
 
     #######################
     ##if cnvnator is called
