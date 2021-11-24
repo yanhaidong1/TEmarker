@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
+##updation 122420 modify a little for the argument description
 ##updation 100320 do not import others script since python2 cannot recognize these scripts
 ##conda install -c conda-forge biopython
-
 ##updation 100320 directly add another arguments for jitterbug and TEFLoN
 ##updation 100320 the mcclintock has not added the --mem and --make_annotations arguments we will directly use it
 ##updation later we can add them into the scripts
@@ -59,14 +59,6 @@ def get_parsed_args():
     parser.add_argument('--mcclintock', dest='mcclintock', help="Before using the mcclintock, please make sure mcclintock software can work."
                                                                 "Attention: please provide the absolute path of mcclintock.")
 
-    ##updation 100320
-    parser.add_argument('--TEFLoN_d', dest='TEFLoN', help="Provide a TEFLoN folder and use python2 conda environment to run")
-    parser.add_argument('--jitterbug_d', dest='jitterbug', help="Provide a jitterbug folder and Use python2 conda environment to run")
-    parser.add_argument('--repeatmasker', dest='repeatmasker',default="/usr/bin/RepeatMasker", help="jitterbug and TEFLoN need TE location files generated from the repeatmasker")
-    parser.add_argument('-bam_bwa_d',dest='bam_bwa_dir',help='TEmarker_bam.py can help to generate bam files used for the jitterbug')
-    parser.add_argument('--bwa', dest='bwa',default="bwa",help="TEFLoN needs to create the bam. bwa is provided to generated the bam file")
-    parser.add_argument('--samtools',dest='samtools',default="samtools",help='TEFLoN needs the samtools to transfer the sam to the bam file')
-
     parser.add_argument('-fastq_d',dest='fastq_dir',help="Provide a dir to contain all the fastq file."
                                                           "Attention: please provide the absolute path of fastq_dir.")
 
@@ -75,6 +67,16 @@ def get_parsed_args():
 
     parser.add_argument('-lib_f', dest='te_library', help="Provide the TE library."
                                                         "Attention: please provide the absolute path of te_library.")
+
+    ##updation 100320
+    parser.add_argument('--TEFLoN_d', dest='TEFLoN', help="Specify a TEFLoN folder and use python2 conda environment to run")
+    parser.add_argument('--jitterbug_d', dest='jitterbug', help="Provide a jitterbug folder and Use python2 conda environment to run")
+    parser.add_argument('--repeatmasker', dest='repeatmasker',default="/usr/bin/RepeatMasker", help="jitterbug and TEFLoN need TE location files generated from the repeatmasker")
+    parser.add_argument('-bam_bwa_d',dest='bam_bwa_dir',help='TEmarker_tool.py can help to generate bam files used for the jitterbug')
+    parser.add_argument('--bwa', dest='bwa',default="bwa",help="TEFLoN needs to create the bam. bwa is provided to generated the bam file")
+    parser.add_argument('--samtools',dest='samtools',default="samtools",help='TEFLoN needs the samtools to transfer the sam to the bam file')
+
+
 
     ##optional
     parser.add_argument('-m_f', dest="name_file",help="If users provide the name_file, and pipeline will substitue the fastq name to "
