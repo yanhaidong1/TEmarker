@@ -91,7 +91,7 @@ def get_parsed_args():
                                                                  "Default: 3")
 
     parser.add_argument('-antgap_thr',dest='annot_gap_thr', help="The nearby TE insertions will be combined within a gap during annotation."
-                                                                 "Default: 15")
+                                                                 "Default: 50")
 
     parser.add_argument('-miss_thr', dest='thr_miss', help="Users provide a threshold to generate a sample number threshold."
                                                            "For example, if thr_miss is equal to 0.7, and the sample number threshold is equal to 0.7*total_sample_number. "
@@ -235,7 +235,7 @@ def main(argv=None):
     if args.annot_gap_thr is not None:
         annot_gap_thr = args.annot_gap_thr
     else:
-        annot_gap_thr = '15'
+        annot_gap_thr = '50'
 
     ##updation 121920
     if args.s_rg_thr is not None:
