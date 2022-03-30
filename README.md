@@ -50,6 +50,14 @@ Please check **Manual.pdf** to learn to condcut **Step 0**.
 Here we provide testing data for all the steps users can download following the command lines.
 
 ## Download testing data  
+### Option 1: Users can download data from the following google drive link:  
+Example_dir_step0.tar.gz  
+https://drive.google.com/file/d/1TwaDBGYQ2OoHIENUgGMfQF8eiO3T1aZV/view?usp=sharing  
+
+Example_dir_step123.zip  
+https://drive.google.com/file/d/1N9hb1WFWdzrP0kQ4v_uxaH8VfeOjZS2n/view?usp=sharing  
+
+### Option 2: Users can download data by using command lines:
 **Commands (Step 1,2,3 data):**  
 * > mkdir output_dir  
 * > Download_test_data.py -o output_dir -s123 yes
