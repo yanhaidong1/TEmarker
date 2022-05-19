@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 051922 close the repeatmasker
 ##updation 122420 modify a little for the argument description
 ##updation 100320 do not import others script since python2 cannot recognize these scripts
 ##conda install -c conda-forge biopython
@@ -271,12 +272,6 @@ def main(argv=None):
         print ('bwa executable can be found')
     else:
         print("Cannot find bwa executable, please check if it has been installed.")
-        return
-
-    if find_executable(args.repeatmasker) is not None:
-        print ('repeatmasker executable can be found')
-    else:
-        print("Cannot find repeatmasker executable, please check if it has been installed.")
         return
 
 
@@ -615,6 +610,12 @@ def main(argv=None):
     ################
     if args.jitterbug is not None:
 
+        if find_executable(args.repeatmasker) is not None:
+            print('repeatmasker executable can be found')
+        else:
+            print("Cannot find repeatmasker executable, please check if it has been installed.")
+            return
+
         ##create the working_dir
         output_jitterbug_dir = working_dir + '/output_jitterbug'
         if not os.path.exists(output_jitterbug_dir):
@@ -715,6 +716,12 @@ def main(argv=None):
     #############
     if args.TEFLoN is not None:
 
+        if find_executable(args.repeatmasker) is not None:
+            print('repeatmasker executable can be found')
+        else:
+            print("Cannot find repeatmasker executable, please check if it has been installed.")
+            return
+
         ##create the working_dir
         output_TEFLoN_dir = working_dir + '/output_TEFLoN'
         if not os.path.exists(output_TEFLoN_dir):
@@ -723,8 +730,6 @@ def main(argv=None):
         samples_output_dir = output_TEFLoN_dir + '/samples_output_dir'
         if not os.path.exists(samples_output_dir):
             os.makedirs(samples_output_dir)
-
-
 
         TEFLoN_dir = args.TEFLoN
         repeatmasker_tool = args.repeatmasker
