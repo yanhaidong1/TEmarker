@@ -5,6 +5,11 @@ TEmarker
 TEmarker developes a marker system based on transposable elements (Transposons; TEs). This tool aims to generate a genotype file using TE markers that could be applied in population genetic analysis.
 
 
+If you use TEmarker in your own study, please consider citing the following article:
+
+HaidongYan David C.Haak SongLi LinkaiHuang AurelianoBombarely 2022 Exploring transposable element-based markers to identify allelic variations underlying agronomic traits in rice. Plant Communications. https://doi.org/10.1016/j.xplc.2021.100270.
+
+
 # Introduction
 In this study, we developed a TE marker system (TEmarker) on the basis of whole-genome shot gun sequencing data. This system contains three steps: 1) construct pan-TE insertions for all individuals in a population, and combine the close insertions together to generate candidate TE markers; 2) determine marker genotypes based on a proportion of split reads mapping on the border region of the TE insertion sites; 3) generate a ‘VCF’ output file used for the downstream analysis such as population structure and GWAS analyses. This tool can combine results from different (TE insertion polymorphisms) TIP calling tools, remove potential false positive TE insertions, and conduct high-throughput genotyping.
 
