@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 052122 check directory of genome file
 ##updating 051922 close the repeatmasker
 ##updation 122420 modify a little for the argument description
 ##updation 100320 do not import others script since python2 cannot recognize these scripts
@@ -444,8 +445,13 @@ def main(argv=None):
         #############################################
         ##udpation 042120
         ##get the genome file without .fasta
-        mt = re.match('.+/(.+)', genome_file)
-        genome_fl_nm = mt.group(1)
+
+        if '/' in genome_file:
+            mt = re.match('.+/(.+)', genome_file)
+            genome_fl_nm = mt.group(1)
+        else:
+            genome_fl_nm = genome_file
+
         mt = re.match('(.+)\.(.+)', genome_fl_nm)
         genome_nm = mt.group(1)
         ##udpation get the genome suffix
