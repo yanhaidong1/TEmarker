@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 052422 make annotations
 ##updating 052122 check directory of genome file
 ##updating 051922 close the repeatmasker
 ##updation 122420 modify a little for the argument description
@@ -378,27 +379,27 @@ def main(argv=None):
         ##generate another gff and hie file for the RetroSeq
 
         ##get the first name in the sample_nm_dic
-        fst_nm_ori = list(sample_nm_dic.keys())[0]
+        #fst_nm_ori = list(sample_nm_dic.keys())[0]
 
         ##updation 10.28 do not cp the raw data to the temp fastq dir to save space
         ##do not unzip fastq if it is wrapped
         ##initiate a list to store the first pair match
-        first_mt_pair_list = []
+        #first_mt_pair_list = []
         ##find the fastq pair for the first sample
-        for eachfastq_fl in fastq_list:
+        #for eachfastq_fl in fastq_list:
             ##extract the name from the eachfastq
-            mt = re.match('(.+)/(.+)', eachfastq_fl)
-            path = mt.group(1)
-            fl_nm = mt.group(2)
-            mt = re.match('(.+)_(\d)(\..+)',fl_nm)
-            fq_nm = mt.group(1)
-            pair_num = mt.group(2)
-            type_nm = mt.group(3)
+        #    mt = re.match('(.+)/(.+)', eachfastq_fl)
+        #    path = mt.group(1)
+        #    fl_nm = mt.group(2)
+        #    mt = re.match('(.+)_(\d)(\..+)',fl_nm)
+        #    fq_nm = mt.group(1)
+        #    pair_num = mt.group(2)
+        #    type_nm = mt.group(3)
 
             ##updation 11.21 change fst_nm_new to the fq_nm
-            if fst_nm_ori == fq_nm:
+        #    if fst_nm_ori == fq_nm:
                 ##store the fist match pair
-                first_mt_pair_list.append(path + '/' +  fq_nm + '_' + pair_num + type_nm)
+        #        first_mt_pair_list.append(path + '/' +  fq_nm + '_' + pair_num + type_nm)
 
         ########################################################
         ##now, we have first pair samples in the input_fastq_dir
@@ -416,28 +417,16 @@ def main(argv=None):
         if not os.path.exists(first_nm_dir):
             os.makedirs(first_nm_dir)
 
+        ##updating 052422 only make the annotation file
         mcclintock_exe = args.mcclintock
-        if tool_str == 'all':
-            cmd = 'python ' + mcclintock_exe + \
-                  ' -r ' + genome_file + \
-                  ' -c ' + library_file + \
-                  ' -1 ' + first_mt_pair_list[0] + \
-                  ' -2 ' + first_mt_pair_list[1] + \
-                  ' -p ' + str(pro_num) + \
-                  ' -o ' + first_nm_dir + \
-                  ' --make_annotations'
-            subprocess.call(cmd, shell=True)
-        else:
-            cmd = 'python ' + mcclintock_exe + \
-                  ' -r ' + genome_file + \
-                  ' -c ' + library_file + \
-                  ' -1 ' + first_mt_pair_list[0] + \
-                  ' -2 ' + first_mt_pair_list[1] + \
-                  ' -p ' + str(pro_num) + \
-                  ' -m ' + tool_str + \
-                  ' -o ' + first_nm_dir + \
-                  ' --make_annotations'
-            subprocess.call(cmd, shell=True)
+        cmd = 'python ' + mcclintock_exe + \
+              ' -r ' + genome_file + \
+              ' -c ' + library_file + \
+              ' -p ' + str(pro_num) + \
+              ' -o ' + first_nm_dir + \
+              ' --make_annotations'
+        subprocess.call(cmd, shell=True)
+
 
 
         #############################################
@@ -502,8 +491,8 @@ def main(argv=None):
                 cmd = 'python ' + mcclintock_exe + \
                       ' -r ' + genome_file + \
                       ' -c ' + library_file + \
-                      ' -1 ' + first_mt_pair_list[0] + \
-                      ' -2 ' + first_mt_pair_list[1] + \
+                      ' -1 ' + mt_pair_list[0] + \
+                      ' -2 ' + mt_pair_list[1] + \
                       ' -p ' + str(pro_num) + \
                       ' -o ' + opt_mcc_temp_dir + \
                       ' -g ' + gff_path + \
@@ -533,7 +522,17 @@ def main(argv=None):
             mt = re.match('.+/(.+)', eachsample_dir)
             sample_nm = mt.group(1)
 
-            method_res_dir_list = glob.glob(eachsample_dir + '/' + sample_nm + '/results/*')
+            ##updating 052422 sometimes the sample nm is SRR800842_1
+            subsample_nm = ''
+            allfl_list = glob.glob(eachsample_dir + '/*')
+            for eachfl in allfl_list:
+                mt = re.match('.+/(.+)',eachfl)
+                flnm = mt.group(1)
+                if sample_nm in flnm:
+                    subsample_nm = flnm
+
+
+            method_res_dir_list = glob.glob(eachsample_dir + '/' + subsample_nm + '/results/*')
             for eachmethod_dir in method_res_dir_list:
                 mt = re.match('.+/(.+)',eachmethod_dir)
                 eachmethod_nm = mt.group(1)
@@ -575,7 +574,7 @@ def main(argv=None):
                             print("please type 'yes' behind clean argument.")
                             return
 
-            bam_res_dir_list = glob.glob(eachsample_dir + '/' + sample_nm + '/intermediate/mapped_reads/*')
+            bam_res_dir_list = glob.glob(eachsample_dir + '/' + subsample_nm + '/intermediate/mapped_reads/*')
             sorted_bam_count = 0
             for eachfl in bam_res_dir_list:
                 mt = re.match('.+/(.+)', eachfl)
