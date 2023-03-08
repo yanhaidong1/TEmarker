@@ -626,7 +626,7 @@ def main(argv=None):
         for x in range(0, int(process_num)):
             each_func_argument = (temp_store_opt_dir_list[x],
                                   temp_split_file_list[x],
-                                  D02_genos_annotation_dir + '/temp_lib_db_dir',
+                                  D02_genos_annotation_dir + '/temp_allte_lib_db_dir',
                                   rm_pcr_mcc_bam_dir,
                                   D02_genos_annotation_dir,
                                   TE_lib_fl,
