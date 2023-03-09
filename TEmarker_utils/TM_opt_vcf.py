@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 030823 when 'c' happens, it needs starting from col[6]
 ##updating 041121 add the read supporting information
 ##updation 110520 add the MAF filtration
 ##updation 110120 add an opt to generate vcf file
@@ -119,7 +120,14 @@ def generate_vcf (input_opt_classify,chr_num_dic,all_name_list,store_change_sp_n
             name_genotype_add_ratio_dic = {}
 
             name_genotype_dic = {}  ##key is the sample name and genotype is the value
-            for i in range(5,total_col_num):
+
+            ##updating 030823
+            if tetype == 'c':
+                starting_num = 6
+            else:
+                starting_num = 5
+
+            for i in range(starting_num,total_col_num):
 
                 ##get the sample name information
                 sample_col = col[i].split(':')
