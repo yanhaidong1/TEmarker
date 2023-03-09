@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+##updating 030823 we do not summarize this file as the name user provide are different
 ##updating 041121 add an option to filter out read coverage
 ##udpation 122420 add an original vcf file and change output file name
 ##updation 110520 add maf filtration argument
@@ -179,7 +180,29 @@ def main(argv=None):
 
 
     ##sorted vcf
-    cmd = 'cat ' + working_dir + '/opt.vcf' + ' | (sed -u 1q; sort -k1,1V -k2,2n) > ' + working_dir + '/opt_sorted.vcf'
+    #cmd = 'cat ' + working_dir + '/opt.vcf' + ' | (sed -u 1q; sort -k1,1V -k2,2n) > ' + working_dir + '/opt_sorted.vcf'
+    #subprocess.call(cmd, shell=True)
+    first_line = ''
+    store_other_line_list = []
+    with open (working_dir + '/opt.vcf','r') as ipt:
+        for eachline in ipt:
+            eachline = eachline.strip('\n')
+            if eachline.startswith('#'):
+                first_line = eachline
+            else:
+                store_other_line_list.append(eachline)
+
+    with open (working_dir + '/temp_unsorted_noheader.vcf','w+') as opt:
+        for eachline in store_other_line_list:
+            opt.write(eachline + '\n')
+
+    with open (working_dir + '/temp_firstline.vcf','w+') as opt:
+        opt.write(first_line + '\n')
+
+    cmd = 'sort -k1,1V -k2,2n ' + working_dir + '/temp_unsorted_noheader.vcf > ' + working_dir + '/temp_unsorted_noheader_sorted.vcf'
+    subprocess.call(cmd, shell=True)
+
+    cmd = 'cat ' + working_dir + '/temp_firstline.vcf ' +  working_dir + '/temp_unsorted_noheader_sorted.vcf > ' + working_dir + '/opt_sorted.vcf'
     subprocess.call(cmd, shell=True)
 
     ##updation 122420 add an original vcf file
@@ -233,10 +256,11 @@ def main(argv=None):
     #        opt.write(eachline + '\n')
 
     ##generate summary information
-    store_summary_line_list = opt_vcf.cal_fam_from_vcf(output_dir + '/opt_fltmissing_fltmaf.vcf')
-    with open (output_dir + '/opt_summary_te_family.txt','w+') as opt:
-        for eachline in store_summary_line_list:
-            opt.write(eachline + '\n')
+    ##updating 030823 we do not summarize this file as the name user provide are different
+    #store_summary_line_list = opt_vcf.cal_fam_from_vcf(output_dir + '/opt_fltmissing_fltmaf.vcf')
+    #with open (output_dir + '/opt_summary_te_family.txt','w+') as opt:
+    #    for eachline in store_summary_line_list:
+    #        opt.write(eachline + '\n')
 
     ##updating 041121 add an output for the final ratio vcf
     final_line_list = opt_vcf.keep_same_to_final(output_dir + '/opt_fltmissing_fltmaf.vcf',working_dir + '/temp_raw_noflt_add_ratio.vcf')
