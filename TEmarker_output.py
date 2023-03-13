@@ -165,6 +165,16 @@ def main(argv=None):
     ##########################
     ##generate vcf output file
     chr_num_dic = opt_vcf.store_chr(genome_file)
+
+    ##updating 031323
+    ##write a plot to show the chr ID and IDs in the vcf file
+    with open (working_dir + '/opt_original_chrID_and_IDs_in_output_VCF.txt','w+') as opt:
+        for eachchrID in chr_num_dic:
+            outputID = str(chr_num_dic[eachchrID])
+            final_line = eachchrID + '\t' + outputID
+            opt.write(final_line + '\n')
+
+
     all_name_list, store_change_sp_nm_dic = opt_vcf.generate_sample_list(material_file)
     store_final_vcf_line_list,store_final_list_add_ratio_noflt_line = opt_vcf.generate_vcf(genotype_file, chr_num_dic, all_name_list, store_change_sp_nm_dic,read_sup)
     store_final_vcf_uniq_line_list = opt_vcf.remove_duplicate(store_final_vcf_line_list)
