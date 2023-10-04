@@ -653,7 +653,11 @@ def main(argv=None):
         subprocess.call(cmd,shell=True)
 
         ##transfer the gff file
-        store_final_line_gff3_list = change_gff_to_gff3(repeatmasker_dir + '/opt_rm_te_genome.fa.out.gff')
+        ##updating 100423
+        ##search for the fa.out.gff
+        all_fl_list = glob.glob(repeatmasker_dir + '/*.fa.out.gff')
+        ipt_gff = all_fl_list[0]
+        store_final_line_gff3_list = change_gff_to_gff3(ipt_gff)
         with open(temp_gff3_dir + '/opt_te.gff3', 'w+') as opt:
             for eachline in store_final_line_gff3_list:
                 opt.write(eachline + '\n')
