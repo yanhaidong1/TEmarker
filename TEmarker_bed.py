@@ -127,8 +127,13 @@ def change_gff_to_gff3 (input_gff_from_rpmsk_fl):
                 mt = re.match('\"Motif:(.+)\"',col[9])
                 TE_nm = mt.group(1)
 
-                mt = re.match('(.+)_TE\d+$',TE_nm)
-                TE_fam_nm = mt.group(1)
+                if re.match('(.+)_TE\d+$',TE_nm):
+
+                    mt = re.match('(.+)_TE\d+$',TE_nm)
+                    TE_fam_nm = mt.group(1)
+
+                else:
+                    TE_fam_nm = TE_nm
 
                 annot_line = 'ID=' + TE_nm + ';Name=' + TE_nm + ';Family=' + TE_fam_nm
                 final_line = col[0] + '\t' + col[1] + '\t' + col[2] + '\t' + col[3] + '\t' + col[4] + '\t' + \
